@@ -1,0 +1,10 @@
+﻿  Main.cpp
+c:\users\kang\documents\visual studio 2015\projects\kakaobot\kakaobot\main.cpp(144): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\string.h(346): note: 'strncpy' 선언을 참조하십시오.
+c:\users\kang\documents\visual studio 2015\projects\kakaobot\kakaobot\main.cpp(315): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: 'inet_addr' 선언을 참조하십시오.
+c:\users\kang\documents\visual studio 2015\projects\kakaobot\kakaobot\main.cpp(368): warning C4477: 'printf' : 서식 문자열 '%p'에 'void *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'DWORD'입니다.
+c:\users\kang\documents\visual studio 2015\projects\kakaobot\kakaobot\main.cpp(392): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(240): note: 'freopen' 선언을 참조하십시오.
+  KakaoBot.vcxproj -> C:\Users\Kang\Documents\Visual Studio 2015\Projects\KakaoBot\Debug\KakaoBot.dll
+  KakaoBot.vcxproj -> C:\Users\Kang\Documents\Visual Studio 2015\Projects\KakaoBot\Debug\KakaoBot.pdb (Full PDB)
