@@ -1,9 +1,4 @@
-
-#include <winsock2.h>
-#include <windows.h>
-#include <stdio.h>
-#include <atlstr.h>
-#include <iostream>
+#include "Hook.h"
 
 
 #pragma comment(lib, "ws2_32.lib")
@@ -12,13 +7,20 @@ void Start();
 CRITICAL_SECTION cs;
 typedef int (__stdcall *KAKAO_WRITE) (DWORD *, DWORD *);
 
-static int S_CNT = 0x2CFB9D83;
+//?? Unused Value
+//static int S_CNT = 0x2CFB9D83;
 
-int koraa=0x8a8f00;
-int TEST = 0xE0CC10;
+DWORD koraa = 0;
+
+//int TEST = 0xE0CC10;
 
 wchar_t buf2[4096];
 char buf3[4096];
+
+
+CHook HookR;
+CHook HookW;
+
 
 typedef struct t1
 {
@@ -70,7 +72,7 @@ unsigned long long *poi2 = NULL;
 unsigned long long CHATID = 0;
 DWORD Kakao_Read_Return = 0;
 DWORD Kakao_Write_Return = 0;
-BYTE jmp[6] = { 0xe9,0x00,0x00,0x00,0x00,0xc3 };
+
 
 int check = 0;
 BYTE *poi = 0;
@@ -92,6 +94,8 @@ LONG WINAPI TestUnhandledExceptionFilter(_EXCEPTION_POINTERS *ExceptionInfo)
 	return 0;
 }
 
+
+/*
 bool bCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
 {
 	for (; *szMask; ++szMask, ++pData, ++bMask)
@@ -106,29 +110,8 @@ DWORD FindPattern(DWORD dwAddress, DWORD dwLen, BYTE *bMask, char * szMask)
 	return 0;
 }//version 2.6.3.1672
 
-DWORD ReadHook(LPVOID lpFunction)
-{
-	DWORD dwAddr = Kakao_Read_Return - 7;
-	DWORD dwCalc = ((DWORD)lpFunction - dwAddr - 5);
 
-	memcpy(&jmp[1], &dwCalc, 4);
-
-
-	
-	WriteProcessMemory(GetCurrentProcess(), (LPVOID)dwAddr, jmp, 6, 0);
-	return dwAddr;
-}
-
-
-DWORD WriteHook(LPVOID lpFunction)
-{
-	DWORD dwAddr = Kakao_Write_Return - 7;
-	DWORD dwCalc = ((DWORD)lpFunction - dwAddr - 5);
-	memcpy(&jmp[1], &dwCalc, 4);
-	WriteProcessMemory(GetCurrentProcess(), (LPVOID)dwAddr, jmp, 6, 0);
-	return dwAddr;
-}
-
+*/
 
 
 void kakao_write(char *msg,int len,unsigned long long c_id)
@@ -144,7 +127,6 @@ void kakao_write(char *msg,int len,unsigned long long c_id)
 	strncpy((char *)SendSTR.str, buf3,nLen2);
 
 	*(DWORD *)((BYTE *)ar0 + 0x1B8) =(DWORD)ar1;
-	//*(DWORD *)((BYTE *)ar0 + 0x3C) = (DWORD)&TEST;
 	*(unsigned long long *)((BYTE *)ar1 + 0x10) = (CHATID);
 	if (c_id != 0)
 	{
@@ -190,21 +172,7 @@ void __declspec(naked) MyRead()
 
 	buf[nLen] = 0;
 	printf("\nChatRoomID: %llu -> Msg: %s", CHATID, buf);
-	/*
-	if (CHATID == 4685476413355193)
-	{
-		//CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)www, NULL, NULL, NULL);
-		//www(");
-	}
-	*/
-	/*
-	
-86433082556536 동네
-108887459440864 배쉬
-182084405123566 내게쓰기
-184342559326416 남자방
-	*/
-	//if (CHATID == 184342559326416)
+
 	if(1)
 	{
 		if (buf[0] == 0x2F)
@@ -294,65 +262,6 @@ void __declspec(naked) MyWrite()
 	
 }
 
-void BG()
-{
-	int sock;
-	char buf[256];
-
-	struct sockaddr_in serv_adr;
-
-	WSADATA wsaData;
-
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
-	Sleep(20000);
-
-	sock = socket(PF_INET, SOCK_STREAM, 0);
-	if (sock == -1)
-		printf("error1\n");
-
-	memset(&serv_adr, 0, sizeof(serv_adr));
-	serv_adr.sin_family = AF_INET;
-	serv_adr.sin_addr.s_addr = inet_addr("58.229.163.25");
-	serv_adr.sin_port = htons(atoi("33333"));
-
-	if (connect(sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1)
-	{
-		printf("Connect Error..\n");
-		return;
-	}
-	else
-	{
-		puts("Connected........\n");
-	}
-	
-	
-	while (1)
-	{
-
-		send(sock, "bglog",5,0);
-		
-		while (1)
-		{
-			int len=recv(sock, buf, 256, 0);
-			buf[len] = 0;
-			if (memcmp(buf, "end", 3) != 0)
-			{
-	//			kakao_write(buf, strlen(buf), 184342559326416);
-	//			kakao_write(buf, strlen(buf), 86433082556536);
-
-			}
-			else
-			{
-				printf("\nwait......\n");
-				Sleep(60000 * 5);
-				break;
-
-			}
-
-		}
-	}
-}
-
 void Start()
 {
 	DWORD dwSize = 0x180000;
@@ -369,18 +278,20 @@ void Start()
 	
 
 	ReadAddress = 0x8b59ce; //0x8b3c6e
-	
 	Kakao_Read_Return = ReadAddress + 7;
-	
 	Kakao_Write_Return = 0x5cd244; //0x5d505f
 	
-	ReadHook(MyRead);
 
-	WriteHook(MyWrite);
 
-	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)BG, NULL, NULL, NULL);
+	printf("Read --> %08X\n", Kakao_Read_Return);
+	printf("Write --> %08X\n", Kakao_Write_Return);
 
-	//BG();
+
+	HookR.AddressHook(Kakao_Read_Return-7, MyRead);
+	HookW.AddressHook(Kakao_Write_Return-7, MyWrite);
+
+	koraa = Kakao_Write_Return+ (*(DWORD*)(HookW.OrgBytes + 3));
+
 
 }
 BOOL APIENTRY DllMain(HMODULE hModul, DWORD ul_reason_for_ca, LPVOID lpReserve)
